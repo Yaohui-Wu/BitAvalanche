@@ -1,22 +1,23 @@
 // Usage (encryption): BitAvalanche -C/c plaintext.file ciphertext.file password
 // Usage (decryption): BitAvalanche -P/p ciphertext.file plaintext.file
 // Compiled on MacOS, Linux and *BSD.
-// Talk is SO EASY, show you my GOD. WOW!
+// Talk is SO EASY, show you my GOD.
+// Simple is beautiful.
 
+#include <fcntl.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <unistd.h>
 
 unsigned char auc1BitTable[8] = {0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80}, auc7BitsTable[8] = {0xFe, 0xFd, 0xFb, 0xF7, 0xEf, 0xDf, 0xBf, 0x7f};
 
 void Encrypt(char *argv[])
 {
-// The data of 256 values of key table that you can set randomly,
-// yet you can freely to change to key table of 65536 values that you can set randomly,
-// you can also freely to change to key table of 4294967296 values that you can set randomly,
-// even if to change to key table of 18446744073709551616 values is no problem, which is only limited by the memory of your machine. WOW!
+// Each value of 256 numbers of key table that you can set randomly,
+// yet you can freely to change to key table of 65536 numbers that you can set randomly,
+// you can also freely to change to key table of 4294967296 numbers that you can set randomly,
+// even if to change to key table of 18446744073709551616 numberes is no problem, which is only limited by the memory of your machine. WOW!
     unsigned char aucKeyTable[256] = {
           0x28, 0xe4, 0x4E, 0x1F, 0x97, 0x9A, 0xfC, 0xd0, 0x3F, 0x00, 0xa5, 0xc5, 0x62, 0x5E, 0x2C, 0x90, 0x16, 0x71, 0x80, 0xf8, 0x40, 0x8E, 0x4D, 0x47, 0xeF, 0x42, 0x13, 0x7E, 0xe9, 0x3E, 0x02, 0x96,
           0xaD, 0x54, 0x75, 0xdA, 0x78, 0xd1, 0x43, 0x50, 0x06, 0xb2, 0x65, 0x04, 0xeD, 0xe5, 0x0D, 0x6B, 0x32, 0x9B, 0x58, 0xc7, 0xbF, 0x3A, 0x8C, 0x7F, 0x48, 0xa6, 0x0F, 0x30, 0xa0, 0x6F, 0x51, 0x64,
@@ -31,27 +32,27 @@ void Encrypt(char *argv[])
     unsigned long ulPasswordLength = -1;
 
 // get password length;
-    while(argv[++ulPasswordLength]);
+    while(argv[2][++ulPasswordLength]);
 
     struct stat statFileSize;
 
     stat(argv[0], &statFileSize);
 
-// get plaintext file size
+// get the plaintext file size
     unsigned long ulFileSize = statFileSize.st_size;
 
 //  allocate storage space
     unsigned char *pucPlaintext = (unsigned char*)malloc(ulFileSize), *pucCiphertext = (unsigned char*)malloc(8 * ulFileSize);
 
-// open plaintext file descriptor
+// open the plaintext file descriptor
     int iPlaintextOrCiphertextFD = open(argv[0], O_RDONLY, S_IRUSR | S_IWUSR);
 
-// read data from plaintext file
+// read data from the plaintext file
     read(iPlaintextOrCiphertextFD, pucPlaintext, ulFileSize);
 
     close(iPlaintextOrCiphertextFD);
 
-// process plaintext data
+// process the plaintext data
     for(unsigned long i = 0; i < ulFileSize; i += 256)
     {
 // key table convert 8 * 32 = 256 bytes of data at a time in order to generate the random number of "JunTai" distribution
@@ -68,7 +69,7 @@ void Encrypt(char *argv[])
             pulKeySwap2[ulKeyIndex] = ulKeyTemp;
         }
 
-// process avalanche
+// process bit avalanche
         for(unsigned long j = 0; j < 256 && i + j < ulFileSize; ++j)
         {
             for(unsigned long k = 0; k < 8; ++k)
@@ -84,10 +85,10 @@ void Encrypt(char *argv[])
         }
     }
 
-// open ciphertext file descriptor
+// open the ciphertext file descriptor
     iPlaintextOrCiphertextFD = open(argv[1], O_CREAT | O_WRONLY, S_IREAD | S_IWRITE);
 
-// write data to ciphertext file
+// write data to the ciphertext file
     write(iPlaintextOrCiphertextFD, pucCiphertext, 8 * ulFileSize);
 
     close(iPlaintextOrCiphertextFD);
@@ -103,16 +104,16 @@ void Decrypt(char *argv[])
 
     stat(argv[0], &statFileSize);
 
-// get ciphertext file size
+// get the ciphertext file size
     unsigned long ulFileSize = statFileSize.st_size;
 
 //  allocate storage space
     unsigned char *pucCiphertext = (unsigned char*)malloc(ulFileSize);
 
-// open ciphertext file descriptor
+// open the ciphertext file descriptor
     int iCiphertextOrPlaintextFD = open(argv[0], O_RDONLY, S_IRUSR | S_IWUSR);
 
-// read data from ciphertext file
+// read data from the ciphertext file
     read(iCiphertextOrPlaintextFD, pucCiphertext, ulFileSize);
 
     close(iCiphertextOrPlaintextFD);
@@ -121,7 +122,7 @@ void Decrypt(char *argv[])
 
     unsigned char *pucPlaintext = (unsigned char*)malloc(ulFileSize);
 
-// process ciphertext data
+// process the ciphertext data
     for(unsigned long i = 0; i < ulFileSize; ++i)
     {
         pucPlaintext[i] = (pucCiphertext[8 * i] & auc1BitTable[0]) | (pucCiphertext[8 * i + 1] & auc1BitTable[1]) | (pucCiphertext[8 * i + 2] & auc1BitTable[2]) |
@@ -129,10 +130,10 @@ void Decrypt(char *argv[])
                           (pucCiphertext[8 * i + 6] & auc1BitTable[6]) | (pucCiphertext[8 * i + 7] & auc1BitTable[7]);
     }
 
-// open plaintext file descriptor
+// open the plaintext file descriptor
     iCiphertextOrPlaintextFD = open(argv[1], O_CREAT | O_WRONLY, S_IREAD | S_IWRITE);
 
-// write data to plaintext file
+// write data to the plaintext file
     write(iCiphertextOrPlaintextFD, pucPlaintext, ulFileSize);
 
     close(iCiphertextOrPlaintextFD);
