@@ -1,6 +1,6 @@
 // Usage (encryption): BitAvalanche -C/c plaintext.file ciphertext.file password
 // Usage (decryption): BitAvalanche -P/p ciphertext.file plaintext.file
-// Compiled on MacOS, Linux and *BSD.
+// Compiled on MacOS, Linux and *BSD in X86_64 platform.
 // Talk is SO EASY, show you my GOD.
 // Simple is beautiful.
 
@@ -17,7 +17,7 @@ void Encrypt(char *argv[])
 // Each value of 256 numbers of key table that you can set randomly,
 // yet you can freely to change to key table of 65536 numbers that you can set randomly,
 // you can also freely to change to key table of 4294967296 numbers that you can set randomly,
-// even if to change to key table of 18446744073709551616 numberes is no problem, which is only limited by the memory of your machine. WOW!
+// even if to change to key table of 18446744073709551616 numberes is no problem, which is only limited by the memory of your machine.
     unsigned char aucKeyTable[256] = {
           0x28, 0xe4, 0x4E, 0x1F, 0x97, 0x9A, 0xfC, 0xd0, 0x3F, 0x00, 0xa5, 0xc5, 0x62, 0x5E, 0x2C, 0x90, 0x16, 0x71, 0x80, 0xf8, 0x40, 0x8E, 0x4D, 0x47, 0xeF, 0x42, 0x13, 0x7E, 0xe9, 0x3E, 0x02, 0x96,
           0xaD, 0x54, 0x75, 0xdA, 0x78, 0xd1, 0x43, 0x50, 0x06, 0xb2, 0x65, 0x04, 0xeD, 0xe5, 0x0D, 0x6B, 0x32, 0x9B, 0x58, 0xc7, 0xbF, 0x3A, 0x8C, 0x7F, 0x48, 0xa6, 0x0F, 0x30, 0xa0, 0x6F, 0x51, 0x64,
@@ -44,13 +44,13 @@ void Encrypt(char *argv[])
 //  allocate storage space
     unsigned char *pucPlaintext = (unsigned char*)malloc(ulFileSize), *pucCiphertext = (unsigned char*)malloc(8 * ulFileSize);
 
-// open the plaintext file descriptor
-    int iPlaintextOrCiphertextFD = open(argv[0], O_RDONLY, S_IRUSR | S_IWUSR);
+// open the plaintext file
+    int iPlaintextOrCiphertext = open(argv[0], O_RDONLY, S_IRUSR | S_IWUSR);
 
 // read data from the plaintext file
-    read(iPlaintextOrCiphertextFD, pucPlaintext, ulFileSize);
+    read(iPlaintextOrCiphertext, pucPlaintext, ulFileSize);
 
-    close(iPlaintextOrCiphertextFD);
+    close(iPlaintextOrCiphertext);
 
 // process the plaintext data
     for(unsigned long i = 0; i < ulFileSize; i += 256)
@@ -58,7 +58,7 @@ void Encrypt(char *argv[])
 // key table convert 8 * 32 = 256 bytes of data at a time in order to generate the random number of "JunTai" distribution
         for(unsigned long jt = 0; jt < 32; ++jt)
         {
-            unsigned long *pulKeySwap1 = (unsigned long*)aucKeyTable, *pulKeySwap2 = (unsigned long*)aucKeyTable, ulKeyTemp, ulKeyIndex;
+            unsigned long ulKeyIndex, ulKeyTemp, *pulKeySwap1 = (unsigned long*)aucKeyTable, *pulKeySwap2 = (unsigned long*)aucKeyTable;
 
             ulKeyIndex = (unsigned char)(argv[2][jt % ulPasswordLength]) % 32;
 
@@ -85,13 +85,13 @@ void Encrypt(char *argv[])
         }
     }
 
-// open the ciphertext file descriptor
-    iPlaintextOrCiphertextFD = open(argv[1], O_CREAT | O_WRONLY, S_IREAD | S_IWRITE);
+// open the ciphertext file
+    iPlaintextOrCiphertext = open(argv[1], O_CREAT | O_WRONLY, S_IREAD | S_IWRITE);
 
 // write data to the ciphertext file
-    write(iPlaintextOrCiphertextFD, pucCiphertext, 8 * ulFileSize);
+    write(iPlaintextOrCiphertext, pucCiphertext, 8 * ulFileSize);
 
-    close(iPlaintextOrCiphertextFD);
+    close(iPlaintextOrCiphertext);
 
     free(pucCiphertext);
 
@@ -110,13 +110,13 @@ void Decrypt(char *argv[])
 //  allocate storage space
     unsigned char *pucCiphertext = (unsigned char*)malloc(ulFileSize);
 
-// open the ciphertext file descriptor
-    int iCiphertextOrPlaintextFD = open(argv[0], O_RDONLY, S_IRUSR | S_IWUSR);
+// open the ciphertext file
+    int iCiphertextOrPlaintext = open(argv[0], O_RDONLY, S_IRUSR | S_IWUSR);
 
 // read data from the ciphertext file
-    read(iCiphertextOrPlaintextFD, pucCiphertext, ulFileSize);
+    read(iCiphertextOrPlaintext, pucCiphertext, ulFileSize);
 
-    close(iCiphertextOrPlaintextFD);
+    close(iCiphertextOrPlaintext);
 
     ulFileSize /= 8;
 
@@ -130,13 +130,13 @@ void Decrypt(char *argv[])
                           (pucCiphertext[8 * i + 6] & auc1BitTable[6]) | (pucCiphertext[8 * i + 7] & auc1BitTable[7]);
     }
 
-// open the plaintext file descriptor
-    iCiphertextOrPlaintextFD = open(argv[1], O_CREAT | O_WRONLY, S_IREAD | S_IWRITE);
+// open the plaintext file
+    iCiphertextOrPlaintext = open(argv[1], O_CREAT | O_WRONLY, S_IREAD | S_IWRITE);
 
 // write data to the plaintext file
-    write(iCiphertextOrPlaintextFD, pucPlaintext, ulFileSize);
+    write(iCiphertextOrPlaintext, pucPlaintext, ulFileSize);
 
-    close(iCiphertextOrPlaintextFD);
+    close(iCiphertextOrPlaintext);
 
     free(pucPlaintext);
 
